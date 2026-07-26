@@ -383,6 +383,7 @@ async function renderApp() {
     main.innerHTML = `<div class="loading">Creating file…</div>`;
     const res = await api('/api/files', { method: 'POST' });
     if (!res.ok) { main.innerHTML = `<div class="empty-state"><span class="big">Couldn't create file</span>Try again in a moment.</div>`; return; }
+    mineCache = null;
     const [owner, shortId] = res.body.id.split('/');
     navigate(`/${owner}/${shortId}`);
     return;
@@ -396,14 +397,21 @@ async function renderApp() {
   await renderList(main);
 }
 
-async function renderList(main) {
-  main.innerHTML = `<div class="loading">Loading files…</div>`;
-  const [mineRes, sharedRes] = await Promise.all([
-    api('/api/files/mine'),
-    api('/api/files/shared-with-me'),
-  ]);
-  const mine = mineRes.ok ? mineRes.body : [];
-  const shared = sharedRes.ok ? sharedRes.body : [];
+let mineCache = null;
+let sharedCache = null;
+
+async function renderList(main, forceRefresh = false) {
+  if (forceRefresh || !mineCache || !sharedCache) {
+    main.innerHTML = `<div class="loading">Loading files…</div>`;
+    const [mineRes, sharedRes] = await Promise.all([
+      api('/api/files/mine'),
+      api('/api/files/shared-with-me'),
+    ]);
+    mineCache = mineRes.ok ? mineRes.body : [];
+    sharedCache = sharedRes.ok ? sharedRes.body : [];
+  }
+  const mine = mineCache;
+  const shared = sharedCache;
   const list = activeTab === 'mine' ? mine : shared;
   const filtered = listSearch
     ? list.filter(f => (f.title || 'untitled').toLowerCase().includes(listSearch) || f.id.toLowerCase().includes(listSearch))
@@ -435,7 +443,7 @@ async function renderList(main) {
   main.innerHTML = html;
   document.getElementById('newFileBtn').onclick = () => navigate('/new');
   main.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => { activeTab = btn.dataset.tab; listSearch = ''; renderList(main); });
+    btn.addEventListener('click', () => { activeTab = btn.dataset.tab; listSearch = ''; renderList(main, false); });
   });
   const searchInput = document.getElementById('listSearchInput');
   searchInput.addEventListener('input', () => { listSearch = searchInput.value.toLowerCase(); renderList(main); });
@@ -450,7 +458,9 @@ async function renderList(main) {
       e.stopPropagation();
       const username = clerkUser.username;
       await api(`/api/files/${username}/${btn.dataset.del}`, { method: 'DELETE' });
-      renderList(main);
+      mineCache = null;
+      sharedCache = null;
+      renderList(main, true);
     });
   });
 }
@@ -620,8 +630,19 @@ window.addEventListener('load', async () => {
   const showingSignUpRef = { value: false };
   document.getElementById('brandLink').onclick = () => { if (clerkUser) navigate('/'); };
 
+  let lastUserId = undefined; // undefined = not yet initialized, null = signed out
   function renderRoot() {
-    clerkUser = window.Clerk.user || null;
+    const user = window.Clerk.user || null;
+
+    // Clerk's listener fires on things that aren't actual sign-in/sign-out
+    // changes too — background token refresh (e.g. when the tab regains
+    // focus) and intermediate steps of an in-progress sign up/sign in.
+    // Only rebuild the app when the signed-in user has actually changed;
+    // otherwise this would blow away the file list (forcing a refetch that
+    // looks like a reload) or the sign-up form mid-submit.
+    if ((user?.id ?? null) === lastUserId) return;
+    lastUserId = user?.id ?? null;
+    clerkUser = user;
     renderUserChip();
 
     if (!clerkUser) {
