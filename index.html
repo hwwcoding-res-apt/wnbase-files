@@ -32,7 +32,8 @@
   header .user-chip { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
   header .user-chip .who { font-weight: 600; color: var(--teal); }
 
-  main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+  main { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; padding: 32px 20px 80px; }
+  .list-wrap { max-width: 760px; margin: 0 auto; }
 
   /* ---- auth card ---- */
   .auth-wrap { display: flex; align-items: center; justify-content: center; min-height: 70vh; }
@@ -179,6 +180,88 @@
   }
   .share-row button { background: none; border: none; color: var(--brick); cursor: pointer; font-size: 0.8rem; }
   .share-empty { color: #a89e97; font-size: 0.85rem; }
+  .share-add-row select, .share-row select {
+    padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.82rem;
+    font-family: inherit; background: white; outline: none; color: var(--ink);
+  }
+  .share-row { flex-wrap: wrap; }
+  .share-row select:focus, .share-add-row select:focus { border-color: var(--teal); }
+
+  /* ---- editor + comments layout ---- */
+  .editor-shell { display: flex; align-items: flex-start; gap: 24px; }
+  .editor-main { flex: 1; min-width: 0; }
+  .comments-col { width: 300px; flex-shrink: 0; }
+  @media (max-width: 900px) {
+    .editor-shell { flex-direction: column; }
+    .comments-col { width: 100%; }
+  }
+
+  .comments-panel {
+    background: white; border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px;
+    position: sticky; top: 20px;
+  }
+  .comments-panel h3 { margin: 0 0 12px; font-size: 1rem; }
+  .comment-select-hint {
+    font-size: 0.8rem; color: #7a6f68; background: var(--cream); border-radius: 8px;
+    padding: 8px 10px; margin-bottom: 12px;
+  }
+  .new-comment-box { margin-bottom: 14px; }
+  .new-comment-box .anchor-quote {
+    font-size: 0.78rem; color: #7a6f68; border-left: 3px solid var(--mustard);
+    padding: 4px 8px; margin-bottom: 6px; font-style: italic;
+  }
+  .comment-textarea {
+    width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+    font-family: inherit; font-size: 0.85rem; resize: vertical; min-height: 54px; outline: none;
+  }
+  .comment-textarea:focus { border-color: var(--teal); }
+  .comment-post-btn {
+    background: var(--teal); color: white; border: none; border-radius: 8px; padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 600; cursor: pointer; margin-top: 6px;
+  }
+  .comment-post-btn:hover { background: #236665; }
+  .comment-post-btn:disabled { opacity: 0.5; cursor: default; }
+  .comment-cancel-btn {
+    background: none; border: none; color: #a89e97; font-size: 0.8rem; cursor: pointer; margin-top: 6px; margin-left: 8px;
+  }
+
+  .thread-list { display: flex; flex-direction: column; gap: 14px; }
+  .thread { border-top: 1px solid var(--line); padding-top: 12px; }
+  .thread:first-child { border-top: none; padding-top: 0; }
+  .thread.resolved { opacity: 0.55; }
+  .thread .anchor-quote {
+    font-size: 0.78rem; color: #7a6f68; border-left: 3px solid var(--mustard); padding: 3px 8px;
+    margin-bottom: 8px; font-style: italic; cursor: pointer;
+  }
+  .thread .anchor-quote:hover { border-left-color: var(--brick); }
+  .comment-item { margin-bottom: 8px; }
+  .comment-item.reply { margin-left: 16px; }
+  .comment-meta { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #a89e97; margin-bottom: 2px; }
+  .comment-meta .author { font-weight: 600; color: var(--ink); }
+  .comment-body { font-size: 0.86rem; line-height: 1.45; white-space: pre-wrap; }
+  .comment-actions { display: flex; gap: 10px; margin-top: 3px; }
+  .comment-actions button {
+    background: none; border: none; color: #a89e97; font-size: 0.75rem; cursor: pointer; padding: 0;
+  }
+  .comment-actions button:hover { color: var(--teal); }
+  .comment-actions button.danger:hover { color: var(--brick); }
+  .reply-row { display: flex; gap: 6px; margin-top: 6px; margin-left: 16px; }
+  .reply-row input {
+    flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px;
+    font-size: 0.82rem; font-family: inherit; outline: none;
+  }
+  .reply-row input:focus { border-color: var(--teal); }
+  .reply-row button { background: none; border: none; color: var(--teal); font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+  .comments-empty { color: #a89e97; font-size: 0.85rem; }
+
+  /* ---- live presence ---- */
+  .presence-bar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .presence-chip {
+    display: flex; align-items: center; gap: 6px; background: white; border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 12px; font-size: 0.8rem; font-weight: 600;
+  }
+  .presence-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); flex-shrink: 0; }
+  .presence-note { font-size: 0.78rem; color: #a89e97; margin-top: -6px; margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -219,6 +302,7 @@
      file:// testing — remove it once deployed.
    ========================================================================= */
 const API_BASE = 'https://wnbase-files-server.onrender.com';
+const WS_BASE = API_BASE.replace(/^http/, 'ws');
 const ALLOWED_PLANNER_ORIGINS = ['https://plan.wnbase.com', 'null', window.location.origin];
 
 const openedFromPlanner = !!window.opener;
@@ -378,6 +462,7 @@ function showError(authArea, err) {
 async function renderApp() {
   const main = document.getElementById('mainArea');
   const route = parseRoute();
+  if (route.view !== 'file') closeActiveEditorWs();
 
   if (route.view === 'new') {
     main.innerHTML = `<div class="loading">Creating file…</div>`;
@@ -440,7 +525,7 @@ async function renderList(main, forceRefresh = false) {
     html += `</div>`;
   }
 
-  main.innerHTML = html;
+  main.innerHTML = `<div class="list-wrap">${html}</div>`;
   document.getElementById('newFileBtn').onclick = () => navigate('/new');
   main.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => { activeTab = btn.dataset.tab; listSearch = ''; renderList(main, false); });
@@ -494,19 +579,34 @@ async function renderEditor(main, owner, shortId) {
   }
   const f = res.body;
   const fid = f.id;
+  const canEdit = f.isOwner || f.role === 'edit';
+  const canComment = f.isOwner || f.role === 'edit' || f.role === 'comment';
+  const bannerText = f.isOwner ? '' : {
+    view: '— view only',
+    comment: '— can comment',
+    edit: '— can edit',
+  }[f.role] || '— view only';
 
   main.innerHTML = `
     ${openedFromPlanner ? `<div class="link-banner">🔗 This file will be linked back to the planner automatically once created.</div>` : ''}
-    ${!f.isOwner ? `<div class="shared-banner">👤 Shared by @${escapeHtml(f.owner)} — read only</div>` : ''}
+    ${!f.isOwner ? `<div class="shared-banner">👤 Shared by @${escapeHtml(f.owner)} ${bannerText}</div>` : ''}
     <div class="editor-topbar">
       <a class="back-link" id="backLink">← Back to files</a>
       <div class="id-chip">${escapeHtml(fid)} <button id="copyIdBtn">Copy ID</button></div>
     </div>
-    <input class="title-input" id="titleInput" placeholder="Untitled" value="${escapeAttr(f.title)}" ${!f.isOwner ? 'readonly' : ''}>
-    <textarea class="content-area" id="contentArea" placeholder="Start writing..." ${!f.isOwner ? 'readonly' : ''}>${escapeHtml(f.content)}</textarea>
-    ${f.isOwner ? `<div class="save-note" id="saveNote">Autosaves as you type</div>` : ''}
-    ${openedFromPlanner && f.isOwner ? `<div class="return-banner"><div class="txt">Send this file's ID back to the planner.</div><button id="sendBackBtn">Attach & return</button></div>` : ''}
-    ${f.isOwner ? `<div class="share-panel" id="sharePanel"></div>` : ''}
+    <div class="presence-bar" id="presenceBar"></div>
+    <div class="editor-shell">
+      <div class="editor-main">
+        <input class="title-input" id="titleInput" placeholder="Untitled" value="${escapeAttr(f.title)}" ${!canEdit ? 'readonly' : ''}>
+        <textarea class="content-area" id="contentArea" placeholder="Start writing..." ${!canEdit ? 'readonly' : ''}>${escapeHtml(f.content)}</textarea>
+        ${canEdit ? `<div class="save-note" id="saveNote">Autosaves as you type</div>` : ''}
+        ${openedFromPlanner && f.isOwner ? `<div class="return-banner"><div class="txt">Send this file's ID back to the planner.</div><button id="sendBackBtn">Attach & return</button></div>` : ''}
+        ${f.isOwner ? `<div class="share-panel" id="sharePanel"></div>` : ''}
+      </div>
+      <div class="comments-col">
+        <div class="comments-panel" id="commentsPanel"></div>
+      </div>
+    </div>
   `;
 
   document.getElementById('backLink').onclick = () => navigate('/');
@@ -518,23 +618,33 @@ async function renderEditor(main, owner, shortId) {
     setTimeout(() => { btn.textContent = old; }, 1200);
   };
 
-  if (f.isOwner) {
-    const titleInput = document.getElementById('titleInput');
-    const contentArea = document.getElementById('contentArea');
-    const saveNote = document.getElementById('saveNote');
-    let saveTimer = null;
-    async function persist() {
-      saveNote.textContent = 'Saving…';
-      await api(`/api/files/${owner}/${shortId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ title: titleInput.value, content: contentArea.value }),
-      });
-      saveNote.textContent = 'Saved just now';
+  const contentArea = document.getElementById('contentArea');
+  const titleInput = document.getElementById('titleInput');
+  let saveNote = document.getElementById('saveNote');
+  let saveTimer = null;
+  let localVersion = f.version || 0;
+  let wsSend = null; // set once the socket is open; falls back to REST otherwise
+
+  async function persist() {
+    if (saveNote) saveNote.textContent = 'Saving…';
+    if (wsSend) {
+      wsSend({ type: 'edit', title: titleInput.value, content: contentArea.value });
+      if (saveNote) saveNote.textContent = 'Saved just now';
+      return;
     }
-    function scheduleSave() {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(persist, 500);
-    }
+    const res = await api(`/api/files/${owner}/${shortId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title: titleInput.value, content: contentArea.value }),
+    });
+    if (res.ok && typeof res.body?.version === 'number') localVersion = res.body.version;
+    if (saveNote) saveNote.textContent = 'Saved just now';
+  }
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persist, 400);
+  }
+
+  if (canEdit) {
     titleInput.addEventListener('input', scheduleSave);
     contentArea.addEventListener('input', scheduleSave);
 
@@ -553,7 +663,61 @@ async function renderEditor(main, owner, shortId) {
 
     renderSharePanel(owner, shortId);
   }
+
+  const commentHandlers = await renderCommentsPanel(owner, shortId, { canComment, canModerate: f.isOwner, contentArea });
+
+  /* ---- Live collaboration socket ---- */
+  function renderPresence(usernames) {
+    const bar = document.getElementById('presenceBar');
+    if (!bar) return;
+    const others = usernames.filter(u => u !== clerkUser.username);
+    bar.innerHTML = others.map(u => `
+      <div class="presence-chip"><span class="presence-dot"></span>@${escapeHtml(u)}</div>
+    `).join('');
+  }
+
+  // Applying a remote edit while the local user is mid-keystroke would wipe
+  // out whatever they're typing, so remote updates are only applied to a
+  // field the local user isn't currently focused on.
+  function applyRemoteUpdate(msg) {
+    if (msg.version <= localVersion) return;
+    localVersion = msg.version;
+    if (document.activeElement !== titleInput) titleInput.value = msg.title;
+    if (document.activeElement !== contentArea) contentArea.value = msg.content;
+    if (saveNote) saveNote.textContent = `Updated by @${msg.from}`;
+  }
+
+  async function connectWs() {
+    try {
+      const token = await window.Clerk.session.getToken();
+      const ws = new WebSocket(`${WS_BASE}/ws/files/${owner}/${shortId}?token=${encodeURIComponent(token)}`);
+      activeEditorWs = ws;
+      ws.onopen = () => { if (canEdit) wsSend = (payload) => ws.send(JSON.stringify(payload)); };
+      ws.onclose = () => { if (activeEditorWs === ws) { wsSend = null; activeEditorWs = null; } };
+      ws.onerror = () => { wsSend = null; };
+      ws.onmessage = (event) => {
+        let msg;
+        try { msg = JSON.parse(event.data); } catch (e) { return; }
+        if (msg.type === 'presence') renderPresence(msg.users);
+        else if (msg.type === 'update') applyRemoteUpdate(msg);
+        else if (msg.type === 'comment_added') commentHandlers?.onRemoteAdded(msg.comment);
+        else if (msg.type === 'comment_updated') commentHandlers?.onRemoteUpdated(msg.commentId, msg.resolved);
+        else if (msg.type === 'comment_deleted') commentHandlers?.onRemoteDeleted(msg.commentId);
+      };
+    } catch (err) {
+      // No live socket — falls back to REST-only autosave/comments (still works, just not live).
+    }
+  }
+  connectWs();
 }
+
+function closeActiveEditorWs() {
+  if (activeEditorWs) {
+    try { activeEditorWs.close(); } catch (e) {}
+    activeEditorWs = null;
+  }
+}
+let activeEditorWs = null;
 
 async function renderSharePanel(owner, shortId) {
   const panel = document.getElementById('sharePanel');
@@ -562,10 +726,17 @@ async function renderSharePanel(owner, shortId) {
   const res = await api(`/api/files/${owner}/${shortId}/shares`);
   const shares = res.ok ? res.body : [];
 
+  const roleOptions = (selected) => `
+    <option value="view" ${selected === 'view' ? 'selected' : ''}>Can view</option>
+    <option value="comment" ${selected === 'comment' ? 'selected' : ''}>Can comment</option>
+    <option value="edit" ${selected === 'edit' ? 'selected' : ''}>Can edit</option>
+  `;
+
   panel.innerHTML = `
     <h3>Shared with</h3>
     <div class="share-add-row">
       <input type="text" id="shareUsernameInput" placeholder="username">
+      <select id="shareRoleInput">${roleOptions('view')}</select>
       <button id="shareAddBtn">Share</button>
     </div>
     <div class="form-error" id="shareError" style="display:none;"></div>
@@ -581,6 +752,7 @@ async function renderSharePanel(owner, shortId) {
     listEl.innerHTML = shares.map(s => `
       <div class="share-row">
         <span>@${escapeHtml(s.username)}</span>
+        <select data-role-for="${escapeAttr(s.username)}">${roleOptions(s.role)}</select>
         <button data-remove="${escapeAttr(s.username)}">Remove</button>
       </div>`).join('');
     listEl.querySelectorAll('[data-remove]').forEach(btn => {
@@ -591,18 +763,31 @@ async function renderSharePanel(owner, shortId) {
         renderShareList();
       });
     });
+    listEl.querySelectorAll('[data-role-for]').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const username = sel.dataset.roleFor;
+        await api(`/api/files/${owner}/${shortId}/shares/${username}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ role: sel.value }),
+        });
+        const s = shares.find(s => s.username === username);
+        if (s) s.role = sel.value;
+      });
+    });
   }
   renderShareList();
 
   document.getElementById('shareAddBtn').onclick = async () => {
     const input = document.getElementById('shareUsernameInput');
+    const roleInput = document.getElementById('shareRoleInput');
     const errEl = document.getElementById('shareError');
     errEl.style.display = 'none';
     const username = input.value.trim();
     if (!username) return;
+    const role = roleInput.value;
     const res = await api(`/api/files/${owner}/${shortId}/shares`, {
       method: 'POST',
-      body: JSON.stringify({ username }),
+      body: JSON.stringify({ username, role }),
     });
     if (!res.ok) {
       errEl.textContent = res.body?.error === 'user_not_found' ? `No user @${username} found.` : "Couldn't share — try again.";
@@ -610,9 +795,213 @@ async function renderSharePanel(owner, shortId) {
       return;
     }
     input.value = '';
-    shares.unshift({ username, sharedAt: Date.now() });
+    const idx = shares.findIndex(s => s.username === username);
+    if (idx > -1) shares[idx].role = role;
+    else shares.unshift({ username, role, sharedAt: Date.now() });
     renderShareList();
   };
+}
+
+/* ---------------- Comments (threaded, anchored to a text selection) ---------------- */
+async function renderCommentsPanel(owner, shortId, { canComment, canModerate, contentArea }) {
+  const panel = document.getElementById('commentsPanel');
+  if (!panel) return;
+  panel.innerHTML = `<h3>Comments</h3><div class="loading" style="padding:0;">Loading…</div>`;
+  const res = await api(`/api/files/${owner}/${shortId}/comments`);
+  const comments = res.ok ? res.body : [];
+  let pendingAnchor = null; // { start, end, text } — set when the user selects text and clicks "Comment"
+
+  function threads() {
+    const top = comments.filter(c => !c.parentId).sort((a, b) => a.createdAt - b.createdAt);
+    return top.map(t => ({ root: t, replies: comments.filter(c => c.parentId === t.id).sort((a, b) => a.createdAt - b.createdAt) }));
+  }
+
+  async function postComment(body, parentId, anchor) {
+    const res = await api(`/api/files/${owner}/${shortId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({
+        body, parentId,
+        anchorStart: anchor?.start ?? null,
+        anchorEnd: anchor?.end ?? null,
+        anchorText: anchor?.text ?? null,
+      }),
+    });
+    if (res.ok) comments.push(res.body);
+    return res.ok;
+  }
+
+  function render() {
+    const selectBtn = canComment ? `
+      <button class="comment-post-btn" id="startCommentBtn" ${pendingAnchor ? '' : 'disabled'}>
+        Comment on selection
+      </button>` : '';
+
+    panel.innerHTML = `
+      <h3>Comments</h3>
+      ${canComment ? `<div class="comment-select-hint">Select text in the file, then comment on it.</div>${selectBtn}` : ''}
+      <div id="newCommentSlot"></div>
+      <div class="thread-list" id="threadList"></div>
+    `;
+
+    if (canComment) {
+      document.getElementById('startCommentBtn').onclick = () => {
+        if (!pendingAnchor) return;
+        renderNewCommentBox(pendingAnchor, null);
+      };
+    }
+
+    const list = document.getElementById('threadList');
+    const grouped = threads();
+    if (!grouped.length) {
+      list.innerHTML = `<div class="comments-empty">No comments yet.</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    grouped.forEach(({ root, replies }) => {
+      const threadEl = document.createElement('div');
+      threadEl.className = 'thread' + (root.resolved ? ' resolved' : '');
+      threadEl.innerHTML = `
+        ${root.anchorText ? `<div class="anchor-quote" data-jump="${escapeAttr(String(root.anchorStart ?? ''))},${escapeAttr(String(root.anchorEnd ?? ''))}">"${escapeHtml(root.anchorText)}"</div>` : ''}
+        ${[root, ...replies].map(c => `
+          <div class="comment-item ${c.id === root.id ? '' : 'reply'}">
+            <div class="comment-meta"><span class="author">@${escapeHtml(c.author)}</span><span>${timeAgo(c.createdAt)}</span></div>
+            <div class="comment-body">${escapeHtml(c.body)}</div>
+            <div class="comment-actions">
+              ${canComment && c.id === root.id ? `<button data-reply="${escapeAttr(root.id)}">Reply</button>` : ''}
+              ${canModerate && c.id === root.id ? `<button data-resolve="${escapeAttr(root.id)}" data-val="${root.resolved ? '0' : '1'}">${root.resolved ? 'Reopen' : 'Resolve'}</button>` : ''}
+              ${(canModerate || clerkUser.username === c.author) ? `<button class="danger" data-del="${escapeAttr(c.id)}">Delete</button>` : ''}
+            </div>
+          </div>
+        `).join('')}
+        <div id="replySlot-${escapeAttr(root.id)}"></div>
+      `;
+      list.appendChild(threadEl);
+    });
+
+    list.querySelectorAll('[data-jump]').forEach(el => {
+      el.addEventListener('click', () => {
+        const [start, end] = el.dataset.jump.split(',').map(v => (v === '' ? null : parseInt(v, 10)));
+        if (start == null || end == null || !contentArea) return;
+        contentArea.focus();
+        try { contentArea.setSelectionRange(start, end); } catch (e) {}
+        contentArea.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      });
+    });
+    list.querySelectorAll('[data-reply]').forEach(btn => {
+      btn.addEventListener('click', () => renderReplyRow(btn.dataset.reply));
+    });
+    list.querySelectorAll('[data-resolve]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const resolved = btn.dataset.val === '1';
+        await api(`/api/files/${owner}/${shortId}/comments/${btn.dataset.resolve}`, {
+          method: 'PATCH', body: JSON.stringify({ resolved }),
+        });
+        const c = comments.find(c => c.id === btn.dataset.resolve);
+        if (c) c.resolved = resolved;
+        render();
+      });
+    });
+    list.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await api(`/api/files/${owner}/${shortId}/comments/${btn.dataset.del}`, { method: 'DELETE' });
+        const idx = comments.findIndex(c => c.id === btn.dataset.del);
+        if (idx > -1) {
+          const removedId = comments[idx].id;
+          for (let i = comments.length - 1; i >= 0; i--) {
+            if (comments[i].id === removedId || comments[i].parentId === removedId) comments.splice(i, 1);
+          }
+        }
+        render();
+      });
+    });
+  }
+
+  function renderReplyRow(parentId) {
+    const slot = document.getElementById(`replySlot-${parentId}`);
+    if (!slot) return;
+    slot.innerHTML = `
+      <div class="reply-row">
+        <input type="text" id="replyInput-${parentId}" placeholder="Reply...">
+        <button id="replySend-${parentId}">Send</button>
+      </div>`;
+    document.getElementById(`replySend-${parentId}`).onclick = async () => {
+      const input = document.getElementById(`replyInput-${parentId}`);
+      const body = input.value.trim();
+      if (!body) return;
+      const ok = await postComment(body, parentId, null);
+      if (ok) render();
+    };
+  }
+
+  function renderNewCommentBox(anchor) {
+    const slot = document.getElementById('newCommentSlot');
+    slot.innerHTML = `
+      <div class="new-comment-box">
+        <div class="anchor-quote">"${escapeHtml(anchor.text)}"</div>
+        <textarea class="comment-textarea" id="newCommentBody" placeholder="Add a comment..."></textarea><br>
+        <button class="comment-post-btn" id="newCommentSend">Comment</button>
+        <button class="comment-cancel-btn" id="newCommentCancel">Cancel</button>
+      </div>`;
+    document.getElementById('newCommentCancel').onclick = () => { slot.innerHTML = ''; };
+    document.getElementById('newCommentSend').onclick = async () => {
+      const body = document.getElementById('newCommentBody').value.trim();
+      if (!body) return;
+      const ok = await postComment(body, null, anchor);
+      if (ok) { pendingAnchor = null; slot.innerHTML = ''; render(); }
+    };
+  }
+
+  render();
+
+  // Track the current selection in the editor so "Comment on selection" has something to anchor to.
+  if (canComment && contentArea) {
+    contentArea.addEventListener('mouseup', updateSelection);
+    contentArea.addEventListener('keyup', updateSelection);
+    contentArea.addEventListener('select', updateSelection);
+  }
+  function updateSelection() {
+    const start = contentArea.selectionStart, end = contentArea.selectionEnd;
+    if (end > start) {
+      pendingAnchor = { start, end, text: contentArea.value.slice(start, end).slice(0, 200) };
+    } else {
+      pendingAnchor = null;
+    }
+    const btn = document.getElementById('startCommentBtn');
+    if (btn) btn.disabled = !pendingAnchor;
+  }
+
+  // Handlers the live-collaboration socket calls when another connected
+  // client adds/resolves/deletes a comment, so this panel stays in sync
+  // without a manual refresh.
+  return {
+    onRemoteAdded(comment) {
+      if (comments.some(c => c.id === comment.id)) return; // already have it (e.g. it's our own post)
+      comments.push(comment);
+      render();
+    },
+    onRemoteUpdated(commentId, resolved) {
+      const c = comments.find(c => c.id === commentId);
+      if (!c) return;
+      c.resolved = resolved;
+      render();
+    },
+    onRemoteDeleted(commentId) {
+      for (let i = comments.length - 1; i >= 0; i--) {
+        if (comments[i].id === commentId || comments[i].parentId === commentId) comments.splice(i, 1);
+      }
+      render();
+    },
+  };
+}
+
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 /* ---------------- Boot ---------------- */
