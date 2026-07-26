@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<!--
+  GitHub Pages has no server-side rewrites, so a direct request to a path
+  like /rakazen/28h7hxy3jc gets served this 404 page. It redirects back to
+  index.html while preserving the full path in sessionStorage, and
+  index.html restores it via history.replaceState on load. Standard trick,
+  see: https://github.com/rafgraph/spa-github-pages
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WNBASE Files</title>
+  <script>
+    sessionStorage.redirectPath = location.pathname + location.search + location.hash;
+    location.replace('/');
+  </script>
+</head>
+<body></body>
+</html>

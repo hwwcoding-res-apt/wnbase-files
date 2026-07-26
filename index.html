@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WNBASE Files</title>
+<style>
+  :root {
+    --cream: #F7F3EA;
+    --teal: #2A7F7E;
+    --mustard: #E0A93E;
+    --brick: #C4522E;
+    --plum: #6B3F69;
+    --ink: #2B2320;
+    --line: #e5ddd3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--cream);
+    font-family: 'Space Grotesk', 'Segoe UI', sans-serif; color: var(--ink);
+  }
+  .blob { position: fixed; border-radius: 50%; opacity: 0.7; z-index: 0; pointer-events: none; }
+  .blob-1 { width: 340px; height: 320px; background: var(--teal); top: -100px; left: -110px; border-radius: 58% 42% 60% 40% / 45% 55% 45% 55%; }
+  .blob-2 { width: 260px; height: 260px; background: var(--mustard); bottom: -90px; right: -80px; border-radius: 40% 60% 45% 55% / 55% 45% 60% 40%; opacity:0.5; }
+
+  header {
+    position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; background: white; border-bottom: 1px solid var(--line);
+  }
+  header .brand { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; cursor: pointer; }
+  header .brand .accent { color: var(--brick); }
+  header .user-chip { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+  header .user-chip .who { font-weight: 600; color: var(--teal); }
+
+  main { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  /* ---- auth card ---- */
+  .auth-wrap { display: flex; align-items: center; justify-content: center; min-height: 70vh; }
+  .card {
+    background: white; border-radius: 24px; max-width: 420px; width: 100%;
+    padding: 40px 32px; box-shadow: 0 20px 60px rgba(43, 35, 32, 0.15); text-align: center;
+  }
+  .card h1 { font-size: 1.8rem; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .card p.sub { color: #7a6f68; margin: 0 0 28px; font-size: 0.95rem; }
+  #auth-area { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
+  .loading { color: #a89e97; font-size: 0.9rem; text-align:center; padding: 40px 0; }
+
+  .field-label { font-size: 0.8rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; display: block; text-align: left; }
+  .field-input {
+    width: 100%; padding: 10px 12px; border: 2px solid var(--line); border-radius: 10px;
+    font-size: 0.9rem; font-family: inherit; box-sizing: border-box;
+  }
+  .field-input:focus { outline: none; border-color: var(--teal); }
+  .auth-form { width: 100%; display: flex; flex-direction: column; gap: 12px; text-align: left; }
+
+  .submit-btn {
+    background: var(--teal); color: white; border: none; padding: 12px; border-radius: 10px;
+    font-size: 0.9rem; font-weight: 600; width: 100%; margin-top: 4px; cursor: pointer;
+  }
+  .submit-btn:hover { background: #236665; }
+  .submit-btn:disabled { opacity: 0.6; cursor: default; }
+  .secondary-btn {
+    background: transparent; color: var(--ink); border: 2px solid var(--line); padding: 10px 24px;
+    border-radius: 999px; font-size: 0.9rem; font-weight: 500; cursor: pointer;
+  }
+  .secondary-btn:hover { border-color: var(--brick); color: var(--brick); }
+  .form-error { color: var(--brick); font-size: 0.8rem; margin-top: -4px; }
+
+  /* ---- linked-from-planner / info banners ---- */
+  .link-banner {
+    background: #FFF1DC; border: 1px solid #FFDDA8; color: #8a5200; border-radius: 12px;
+    padding: 12px 16px; font-size: 0.85rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+  }
+  .shared-banner {
+    background: #E7F3F3; border: 1px solid #C7E6E5; color: #1E6564; border-radius: 12px;
+    padding: 12px 16px; font-size: 0.85rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+  }
+
+  /* ---- access denied ---- */
+  .denied-wrap { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+  .denied-card {
+    background: white; border-radius: 24px; max-width: 440px; width: 100%; padding: 40px 32px;
+    box-shadow: 0 20px 60px rgba(43, 35, 32, 0.15); text-align: center;
+  }
+  .denied-card .icon { font-size: 2.2rem; margin-bottom: 8px; }
+  .denied-card h2 { margin: 0 0 8px; font-size: 1.3rem; }
+  .denied-card p { color: #7a6f68; font-size: 0.92rem; margin: 0 0 24px; }
+  .denied-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* ---- file list ---- */
+  .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+  .page-head h2 { margin: 0; font-size: 1.4rem; }
+  .new-file-btn {
+    background: var(--teal); color: white; border: none; border-radius: 999px; padding: 10px 20px;
+    font-size: 0.88rem; font-weight: 600; cursor: pointer;
+  }
+  .new-file-btn:hover { background: #236665; }
+
+  .tabs { display: flex; gap: 4px; background: white; border: 1px solid var(--line); border-radius: 12px; padding: 4px; margin-bottom: 18px; width: fit-content; }
+  .tab-btn {
+    background: none; border: none; padding: 8px 18px; border-radius: 9px; font-size: 0.85rem;
+    font-weight: 600; color: #a89e97; cursor: pointer; font-family: inherit;
+  }
+  .tab-btn.active { background: var(--teal); color: white; }
+
+  .search-row { margin-bottom: 16px; }
+  .search-row input {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px;
+    font-size: 0.88rem; font-family: inherit; background: white; outline: none;
+  }
+  .search-row input:focus { border-color: var(--teal); }
+
+  .file-list { background: white; border-radius: 16px; border: 1px solid var(--line); overflow: hidden; }
+  .file-row {
+    display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); cursor: pointer;
+  }
+  .file-row:last-child { border-bottom: none; }
+  .file-row:hover { background: #FAF7F0; }
+  .file-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--teal); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; flex-shrink:0; }
+  .file-row-body { flex: 1; min-width: 0; }
+  .file-row-title { font-size: 0.95rem; font-weight: 600; }
+  .file-row-id { font-size: 0.78rem; color: #a89e97; font-family: monospace; margin-top: 1px; }
+  .file-row-del { background: none; border: none; color: #b3a89f; cursor: pointer; font-size: 0.9rem; padding: 4px 6px; }
+  .file-row-del:hover { color: var(--brick); }
+  .empty-state { text-align: center; padding: 60px 20px; color: #a89e97; }
+  .empty-state .big { font-size: 1.15rem; font-weight: 700; color: var(--ink); display: block; margin-bottom: 6px; }
+
+  /* ---- editor ---- */
+  .editor-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; gap: 12px; flex-wrap: wrap; }
+  .back-link { color: var(--teal); font-weight: 600; font-size: 0.88rem; cursor: pointer; text-decoration: none; }
+  .id-chip {
+    font-family: monospace; font-size: 0.78rem; background: white; border: 1px solid var(--line);
+    border-radius: 8px; padding: 5px 10px; color: #7a6f68; display: flex; align-items: center; gap: 8px;
+  }
+  .id-chip button { background: none; border: none; color: var(--teal); cursor: pointer; font-size: 0.75rem; font-weight: 600; }
+  .title-input {
+    width: 100%; font-size: 1.6rem; font-weight: 700; border: none; background: transparent; outline: none;
+    font-family: inherit; margin-bottom: 14px; color: var(--ink);
+  }
+  .title-input::placeholder { color: #cfc6bb; }
+  .content-area {
+    width: 100%; min-height: 320px; border: 1px solid var(--line); border-radius: 14px; background: white;
+    padding: 20px; font-size: 0.98rem; font-family: inherit; line-height: 1.6; outline: none; resize: vertical;
+  }
+  .content-area:focus { border-color: var(--teal); }
+  .content-area[readonly] { background: #FAF8F3; color: #55504a; }
+  .save-note { font-size: 0.78rem; color: #a89e97; margin-top: 8px; }
+
+  .return-banner {
+    background: var(--teal); color: white; border-radius: 14px; padding: 16px 20px; margin-top: 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .return-banner .txt { font-size: 0.92rem; }
+  .return-banner button {
+    background: white; color: var(--teal); border: none; border-radius: 999px; padding: 9px 18px;
+    font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  }
+
+  /* ---- sharing panel ---- */
+  .share-panel {
+    background: white; border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-top: 20px;
+  }
+  .share-panel h3 { margin: 0 0 12px; font-size: 1rem; }
+  .share-add-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .share-add-row input {
+    flex: 1; padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.88rem;
+    font-family: inherit; outline: none;
+  }
+  .share-add-row input:focus { border-color: var(--teal); }
+  .share-add-row button {
+    background: var(--teal); color: white; border: none; border-radius: 8px; padding: 0 16px;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  }
+  .share-add-row button:hover { background: #236665; }
+  .share-list { display: flex; flex-direction: column; gap: 6px; }
+  .share-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 7px 10px;
+    background: var(--cream); border-radius: 8px; font-size: 0.88rem;
+  }
+  .share-row button { background: none; border: none; color: var(--brick); cursor: pointer; font-size: 0.8rem; }
+  .share-empty { color: #a89e97; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+
+<header>
+  <div class="brand" id="brandLink">WNBASE Files<span class="accent">.</span></div>
+  <div class="user-chip" id="userChip"></div>
+</header>
+
+<main id="mainArea">
+  <div class="auth-wrap">
+    <div class="card">
+      <h1>Files<span class="accent">.</span></h1>
+      <p class="sub">Sign in to view and create files</p>
+      <div id="auth-area"><div class="loading">Loading…</div></div>
+    </div>
+  </div>
+</main>
+
+<script
+  async
+  crossorigin="anonymous"
+  data-clerk-publishable-key="pk_test_Y2xvc2UtbWFncGllLTEwLmNsZXJrLmFjY291bnRzLmRldiQ"
+  src="https://close-magpie-10.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  type="text/javascript"
+></script>
+
+<script>
+/* =========================================================================
+   CONFIG
+   - API_BASE points at the wnbase-files-server backend (Node/Express).
+     Update before deploying.
+   - ALLOWED_PLANNER_ORIGINS: origins allowed to receive postMessage when
+     this app was opened from the planner. "null" is kept for local
+     file:// testing — remove it once deployed.
+   ========================================================================= */
+const API_BASE = 'https://api.files.wnbase.com';
+const ALLOWED_PLANNER_ORIGINS = ['https://plan.wnbase.com', 'null', window.location.origin];
+
+const openedFromPlanner = !!window.opener;
+let clerkUser = null;
+
+/* ---------------------------------------------------------------------- */
+/* API helper — attaches the Clerk session token to every call.           */
+/* ---------------------------------------------------------------------- */
+async function api(path, opts = {}) {
+  const token = await window.Clerk.session.getToken();
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...opts,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      ...(opts.headers || {}),
+    },
+  });
+  let body = null;
+  try { body = await res.json(); } catch (e) {}
+  return { ok: res.ok, status: res.status, body };
+}
+
+/* ---------------------------------------------------------------------- */
+/* Routing — real paths (/, /new, /:owner/:shortId), via History API.     */
+/* Note for GitHub Pages: path-based SPA routes need a 404.html that      */
+/* redirects back to index.html (the standard GH Pages SPA trick), since  */
+/* GH Pages has no server-side rewrite rules. A ready-made 404.html is    */
+/* included alongside this file.                                         */
+/* ---------------------------------------------------------------------- */
+function parseRoute() {
+  const parts = location.pathname.split('/').filter(Boolean);
+  if (parts.length === 0) return { view: 'list' };
+  if (parts[0] === 'new') return { view: 'new' };
+  if (parts.length >= 2) return { view: 'file', owner: parts[0], shortId: parts[1] };
+  return { view: 'list' };
+}
+function navigate(path) {
+  history.pushState({}, '', path);
+  renderApp();
+}
+window.addEventListener('popstate', () => { if (clerkUser) renderApp(); });
+
+let activeTab = 'mine'; // 'mine' | 'shared'
+let listSearch = '';
+
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+function escapeAttr(s) { return (s || '').replace(/"/g, '&quot;'); }
+
+function renderUserChip() {
+  const chip = document.getElementById('userChip');
+  if (!clerkUser) { chip.innerHTML = ''; return; }
+  const name = clerkUser.username || 'unknown';
+  chip.innerHTML = `<span class="who">@${escapeHtml(name)}</span>`;
+  const btn = document.createElement('button');
+  btn.className = 'secondary-btn';
+  btn.style.padding = '6px 16px';
+  btn.style.fontSize = '0.8rem';
+  btn.textContent = 'Sign out';
+  btn.onclick = () => window.Clerk.signOut();
+  chip.appendChild(btn);
+}
+
+/* ---------------- Auth UI (username/password only) ---------------- */
+function buildAuthForm(authArea, showingSignUpRef) {
+  authArea.innerHTML = '';
+
+  const label = document.createElement('div');
+  label.className = 'field-label';
+  label.style.marginBottom = '8px';
+  label.textContent = showingSignUpRef.value ? 'Create your account' : 'Sign in';
+  authArea.appendChild(label);
+
+  const form = document.createElement('div');
+  form.className = 'auth-form';
+
+  const usernameWrap = document.createElement('div');
+  usernameWrap.innerHTML = `<label class="field-label">Username</label>`;
+  const usernameInput = document.createElement('input');
+  usernameInput.className = 'field-input';
+  usernameInput.type = 'text';
+  usernameInput.autocomplete = 'username';
+  usernameWrap.appendChild(usernameInput);
+  form.appendChild(usernameWrap);
+
+  const passWrap = document.createElement('div');
+  passWrap.innerHTML = `<label class="field-label">Password</label>`;
+  const passInput = document.createElement('input');
+  passInput.className = 'field-input';
+  passInput.type = 'password';
+  passInput.autocomplete = showingSignUpRef.value ? 'new-password' : 'current-password';
+  passWrap.appendChild(passInput);
+  form.appendChild(passWrap);
+
+  const submitBtn = document.createElement('button');
+  submitBtn.className = 'submit-btn';
+  submitBtn.textContent = showingSignUpRef.value ? 'Sign up' : 'Sign in';
+  submitBtn.onclick = async () => {
+    const existingErr = authArea.querySelector('.form-error');
+    if (existingErr) existingErr.remove();
+    submitBtn.disabled = true;
+    try {
+      if (showingSignUpRef.value) {
+        const result = await window.Clerk.client.signUp.create({
+          username: usernameInput.value,
+          password: passInput.value,
+        });
+        if (result.status === 'complete') {
+          await window.Clerk.setActive({ session: result.createdSessionId });
+        } else {
+          showError(authArea, { message: `Additional step required: ${result.status}` });
+        }
+      } else {
+        const result = await window.Clerk.client.signIn.create({
+          identifier: usernameInput.value,
+          password: passInput.value,
+        });
+        if (result.status === 'complete') {
+          await window.Clerk.setActive({ session: result.createdSessionId });
+        } else {
+          showError(authArea, { message: `Additional step required: ${result.status}` });
+        }
+      }
+    } catch (err) {
+      showError(authArea, err);
+    } finally {
+      submitBtn.disabled = false;
+    }
+  };
+  form.appendChild(submitBtn);
+  authArea.appendChild(form);
+
+  const toggle = document.createElement('button');
+  toggle.className = 'secondary-btn';
+  toggle.style.marginTop = '4px';
+  toggle.textContent = showingSignUpRef.value
+    ? 'Already have an account? Sign in'
+    : "Don't have an account? Sign up";
+  toggle.onclick = () => {
+    showingSignUpRef.value = !showingSignUpRef.value;
+    buildAuthForm(authArea, showingSignUpRef);
+  };
+  authArea.appendChild(toggle);
+}
+
+function showError(authArea, err) {
+  const msg = err?.errors?.[0]?.longMessage || err?.message || 'Something went wrong.';
+  const existing = authArea.querySelector('.form-error');
+  if (existing) existing.remove();
+  const errEl = document.createElement('div');
+  errEl.className = 'form-error';
+  errEl.textContent = msg;
+  authArea.appendChild(errEl);
+}
+
+/* ---------------- App views (post-login) ---------------- */
+async function renderApp() {
+  const main = document.getElementById('mainArea');
+  const route = parseRoute();
+
+  if (route.view === 'new') {
+    main.innerHTML = `<div class="loading">Creating file…</div>`;
+    const res = await api('/api/files', { method: 'POST' });
+    if (!res.ok) { main.innerHTML = `<div class="empty-state"><span class="big">Couldn't create file</span>Try again in a moment.</div>`; return; }
+    const [owner, shortId] = res.body.id.split('/');
+    navigate(`/${owner}/${shortId}`);
+    return;
+  }
+
+  if (route.view === 'file') {
+    await renderEditor(main, route.owner, route.shortId);
+    return;
+  }
+
+  await renderList(main);
+}
+
+async function renderList(main) {
+  main.innerHTML = `<div class="loading">Loading files…</div>`;
+  const [mineRes, sharedRes] = await Promise.all([
+    api('/api/files/mine'),
+    api('/api/files/shared-with-me'),
+  ]);
+  const mine = mineRes.ok ? mineRes.body : [];
+  const shared = sharedRes.ok ? sharedRes.body : [];
+  const list = activeTab === 'mine' ? mine : shared;
+  const filtered = listSearch
+    ? list.filter(f => (f.title || 'untitled').toLowerCase().includes(listSearch) || f.id.toLowerCase().includes(listSearch))
+    : list;
+
+  let html = `<div class="page-head"><h2>Files</h2><button class="new-file-btn" id="newFileBtn">+ New File</button></div>`;
+  html += `<div class="tabs">
+      <button class="tab-btn ${activeTab === 'mine' ? 'active' : ''}" data-tab="mine">My Files (${mine.length})</button>
+      <button class="tab-btn ${activeTab === 'shared' ? 'active' : ''}" data-tab="shared">Shared with me (${shared.length})</button>
+    </div>`;
+  html += `<div class="search-row"><input type="text" id="listSearchInput" placeholder="Search ${activeTab === 'mine' ? 'my files' : 'files shared with me'}..." value="${escapeAttr(listSearch)}"></div>`;
+
+  if (!filtered.length) {
+    html += `<div class="empty-state"><span class="big">${listSearch ? 'No matches' : activeTab === 'mine' ? 'No files yet' : 'Nothing shared with you yet'}</span>${activeTab === 'mine' ? 'Create one to get an ID you can attach or share.' : "When someone shares a file with your username, it'll show up here."}</div>`;
+  } else {
+    html += `<div class="file-list">`;
+    html += filtered.map(f => `
+      <div class="file-row" data-owner="${escapeAttr(f.owner || f.id.split('/')[0])}" data-shortid="${escapeAttr(f.id.split('/')[1])}">
+        <div class="file-icon">📄</div>
+        <div class="file-row-body">
+          <div class="file-row-title">${escapeHtml(f.title || 'Untitled')}</div>
+          <div class="file-row-id">${escapeHtml(f.id)}</div>
+        </div>
+        ${activeTab === 'mine' ? `<button class="file-row-del" data-del="${escapeAttr(f.id.split('/')[1])}" title="Delete">✕</button>` : ''}
+      </div>`).join('');
+    html += `</div>`;
+  }
+
+  main.innerHTML = html;
+  document.getElementById('newFileBtn').onclick = () => navigate('/new');
+  main.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => { activeTab = btn.dataset.tab; listSearch = ''; renderList(main); });
+  });
+  const searchInput = document.getElementById('listSearchInput');
+  searchInput.addEventListener('input', () => { listSearch = searchInput.value.toLowerCase(); renderList(main); });
+  main.querySelectorAll('.file-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('[data-del]')) return;
+      navigate(`/${row.dataset.owner}/${row.dataset.shortid}`);
+    });
+  });
+  main.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const username = clerkUser.username;
+      await api(`/api/files/${username}/${btn.dataset.del}`, { method: 'DELETE' });
+      renderList(main);
+    });
+  });
+}
+
+function renderDenied(main, owner, shortId, reason) {
+  const message = reason === 'not_found'
+    ? "This file doesn't exist."
+    : "This file isn't shared with you.";
+  main.innerHTML = `
+    <div class="denied-wrap">
+      <div class="denied-card">
+        <div class="icon">🔒</div>
+        <h2>${message}</h2>
+        <p>You're signed in as <strong>@${escapeHtml(clerkUser.username)}</strong>. If this file belongs to someone else, you'll need to sign in with the account it was shared with.</p>
+        <div class="denied-actions">
+          <button class="secondary-btn" id="deniedBack">Back to my files</button>
+          <button class="submit-btn" id="deniedLogout" style="width:auto;padding:10px 20px;">Log out</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('deniedBack').onclick = () => navigate('/');
+  document.getElementById('deniedLogout').onclick = () => window.Clerk.signOut();
+}
+
+async function renderEditor(main, owner, shortId) {
+  main.innerHTML = `<div class="loading">Loading file…</div>`;
+  const res = await api(`/api/files/${owner}/${shortId}`);
+  if (!res.ok) {
+    renderDenied(main, owner, shortId, res.body?.error === 'not_found' ? 'not_found' : 'not_shared');
+    return;
+  }
+  const f = res.body;
+  const fid = f.id;
+
+  main.innerHTML = `
+    ${openedFromPlanner ? `<div class="link-banner">🔗 This file will be linked back to the planner automatically once created.</div>` : ''}
+    ${!f.isOwner ? `<div class="shared-banner">👤 Shared by @${escapeHtml(f.owner)} — read only</div>` : ''}
+    <div class="editor-topbar">
+      <a class="back-link" id="backLink">← Back to files</a>
+      <div class="id-chip">${escapeHtml(fid)} <button id="copyIdBtn">Copy ID</button></div>
+    </div>
+    <input class="title-input" id="titleInput" placeholder="Untitled" value="${escapeAttr(f.title)}" ${!f.isOwner ? 'readonly' : ''}>
+    <textarea class="content-area" id="contentArea" placeholder="Start writing..." ${!f.isOwner ? 'readonly' : ''}>${escapeHtml(f.content)}</textarea>
+    ${f.isOwner ? `<div class="save-note" id="saveNote">Autosaves as you type</div>` : ''}
+    ${openedFromPlanner && f.isOwner ? `<div class="return-banner"><div class="txt">Send this file's ID back to the planner.</div><button id="sendBackBtn">Attach & return</button></div>` : ''}
+    ${f.isOwner ? `<div class="share-panel" id="sharePanel"></div>` : ''}
+  `;
+
+  document.getElementById('backLink').onclick = () => navigate('/');
+  document.getElementById('copyIdBtn').onclick = () => {
+    navigator.clipboard?.writeText(fid);
+    const btn = document.getElementById('copyIdBtn');
+    const old = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = old; }, 1200);
+  };
+
+  if (f.isOwner) {
+    const titleInput = document.getElementById('titleInput');
+    const contentArea = document.getElementById('contentArea');
+    const saveNote = document.getElementById('saveNote');
+    let saveTimer = null;
+    async function persist() {
+      saveNote.textContent = 'Saving…';
+      await api(`/api/files/${owner}/${shortId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ title: titleInput.value, content: contentArea.value }),
+      });
+      saveNote.textContent = 'Saved just now';
+    }
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(persist, 500);
+    }
+    titleInput.addEventListener('input', scheduleSave);
+    contentArea.addEventListener('input', scheduleSave);
+
+    const sendBackBtn = document.getElementById('sendBackBtn');
+    if (sendBackBtn) {
+      sendBackBtn.onclick = async () => {
+        clearTimeout(saveTimer);
+        await persist();
+        const payload = { type: 'wnbase-file-attach', id: fid, title: titleInput.value || 'Untitled' };
+        try { window.opener.postMessage(payload, '*'); } catch (e) {}
+        sendBackBtn.textContent = 'Sent ✓';
+        sendBackBtn.disabled = true;
+        setTimeout(() => { try { window.close(); } catch (e) {} }, 600);
+      };
+    }
+
+    renderSharePanel(owner, shortId);
+  }
+}
+
+async function renderSharePanel(owner, shortId) {
+  const panel = document.getElementById('sharePanel');
+  if (!panel) return;
+  panel.innerHTML = `<h3>Shared with</h3><div class="loading" style="padding:0;">Loading…</div>`;
+  const res = await api(`/api/files/${owner}/${shortId}/shares`);
+  const shares = res.ok ? res.body : [];
+
+  panel.innerHTML = `
+    <h3>Shared with</h3>
+    <div class="share-add-row">
+      <input type="text" id="shareUsernameInput" placeholder="username">
+      <button id="shareAddBtn">Share</button>
+    </div>
+    <div class="form-error" id="shareError" style="display:none;"></div>
+    <div class="share-list" id="shareList"></div>
+  `;
+
+  function renderShareList() {
+    const listEl = document.getElementById('shareList');
+    if (!shares.length) {
+      listEl.innerHTML = `<div class="share-empty">Not shared with anyone yet.</div>`;
+      return;
+    }
+    listEl.innerHTML = shares.map(s => `
+      <div class="share-row">
+        <span>@${escapeHtml(s.username)}</span>
+        <button data-remove="${escapeAttr(s.username)}">Remove</button>
+      </div>`).join('');
+    listEl.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await api(`/api/files/${owner}/${shortId}/shares/${btn.dataset.remove}`, { method: 'DELETE' });
+        const idx = shares.findIndex(s => s.username === btn.dataset.remove);
+        if (idx > -1) shares.splice(idx, 1);
+        renderShareList();
+      });
+    });
+  }
+  renderShareList();
+
+  document.getElementById('shareAddBtn').onclick = async () => {
+    const input = document.getElementById('shareUsernameInput');
+    const errEl = document.getElementById('shareError');
+    errEl.style.display = 'none';
+    const username = input.value.trim();
+    if (!username) return;
+    const res = await api(`/api/files/${owner}/${shortId}/shares`, {
+      method: 'POST',
+      body: JSON.stringify({ username }),
+    });
+    if (!res.ok) {
+      errEl.textContent = res.body?.error === 'user_not_found' ? `No user @${username} found.` : "Couldn't share — try again.";
+      errEl.style.display = 'block';
+      return;
+    }
+    input.value = '';
+    shares.unshift({ username, sharedAt: Date.now() });
+    renderShareList();
+  };
+}
+
+/* ---------------- Boot ---------------- */
+window.addEventListener('load', async () => {
+  // Restore the real path if we were bounced here by 404.html's redirect trick.
+  if (sessionStorage.redirectPath) {
+    const restored = sessionStorage.redirectPath;
+    delete sessionStorage.redirectPath;
+    if (restored && restored !== '/') history.replaceState({}, '', restored);
+  }
+
+  await window.Clerk.load();
+
+  const main = document.getElementById('mainArea');
+  const showingSignUpRef = { value: false };
+  document.getElementById('brandLink').onclick = () => { if (clerkUser) navigate('/'); };
+
+  function renderRoot() {
+    clerkUser = window.Clerk.user || null;
+    renderUserChip();
+
+    if (!clerkUser) {
+      main.innerHTML = `
+        <div class="auth-wrap">
+          <div class="card">
+            <h1>Files<span class="accent">.</span></h1>
+            <p class="sub">Sign in to view and create files</p>
+            <div id="auth-area"></div>
+          </div>
+        </div>`;
+      buildAuthForm(document.getElementById('auth-area'), showingSignUpRef);
+      return;
+    }
+
+    renderApp();
+  }
+
+  window.Clerk.addListener(renderRoot);
+  renderRoot();
+});
+</script>
+
+</body>
+</html>
